@@ -66,7 +66,7 @@ static void ShowUsage(std::string name)
     if( i != std::string::npos )
         name.erase(0, i + 1);
 
-    printf("  Usage: %s [-4|6] [-e] [-port|pasv] [-s tls/1.0] [-referurl URL] [-u PROXYURL] [-c OFFSET] [-o FILE] protocol://[user:password@]host[:port]/path/file\n", name.c_str());
+    printf("  Usage: %s [-4|6] [-e] [-port|pasv] [-s tls/1.0] [-check-certificate] [-referurl URL] [-u PROXYURL] [-c OFFSET] [-o FILE] protocol://[user:password@]host[:port]/path/file\n", name.c_str());
     printf("Options:\n");
     printf("      -4 Enforce IPv4\n");
     printf("      -6 Enforce IPv6\n");
@@ -74,6 +74,7 @@ static void ShowUsage(std::string name)
     printf("      -port|pasv use PORT or PASSV mode to Establish data connection\n");
     printf("      -referurl use refer url\n");
     printf("      -s use TLS or SSL\n");
+    printf("      -check-certificate\n");
     printf("      -u use proxy url, protocol://[user:password@]host[:port]/ver?params\n");
     printf("      -c continue-at OFFSET  Resumed transfer OFFSET\n");
     printf("      -o save FILE\n");
@@ -85,6 +86,16 @@ int main(int argc, const char *argv[])
     printf("Copyright (c) netsecsp 2012-2032, All rights reserved.\n");
     printf("Developer: Shengqian Yang, from China, E-mail: netsecsp@hotmail.com, last updated " STRING_UPDATETIME "\n");
     printf("http://acurl.sf.net\n\n");
+
+    for(int i = 1; i < argc; ++ i)
+    {
+        if( strcmp(argv[i], "/?") == 0 || 
+            strcmp(argv[i], "--help") == 0 )
+        {
+            ShowUsage(argv[0]);
+            return 0;
+        }
+    }
 
     if( Initialize(NULL, NULL) != NO_ERROR )
     {
@@ -105,36 +116,14 @@ int main(int argc, const char *argv[])
         CComPtr<IAsynFrameThread> spAsynFrameThread;
         lpInstancesManager->NewInstance(0, TC_Iocp, IID_IAsynFrameThread, (void **)&spAsynFrameThread);
 
-        std::string tmpurl;
-        for(int i = 1; i < argc; ++ i)
-        {
-            if( strcmp(argv[i], "/?") == 0 || 
-                strcmp(argv[i], "--help") == 0 )
+        int run = 0;
+ 
+        {// check ftp/ftps
+            std::unique_ptr<CFtpxDownloader> downloader(new CFtpxDownloader(lpInstancesManager, spAsynFrameThread));
+            const char *ftpxurl = downloader->Parse(argc, argv);
+            if( ftpxurl )
             {
-                tmpurl.clear();
-                break;
-            }
-            else
-            {
-                tmpurl = argv[i];
-            }
-        }
-
-        std::string::size_type post = tmpurl.find("://");
-        if( post == std::string::npos )
-        {
-            ShowUsage(argv[0]);
-        }
-        else
-        {
-            std::string schema = tmpurl.substr(0, post);
-            _strlwr_s((char*)schema.c_str(), schema.size() + 1);
-
-            if( schema == "ftp" ||
-                schema == "ftps")
-            {
-                std::unique_ptr<CFtpxDownloader> downloader(new CFtpxDownloader(lpInstancesManager, spAsynFrameThread));
-                const char *ftpxurl = downloader->Parse(argc, argv);
+                run = 1;
                 if( downloader->Start(ftpxurl))
                 {
                     while( WAIT_OBJECT_0 != ::WaitForSingleObject(downloader->m_hNotify, 0) &&
@@ -143,13 +132,17 @@ int main(int argc, const char *argv[])
                         Sleep(100); //0.1sec
                     }
                 }
-                downloader->Shutdown();
             }
-            else if( schema == "http" ||
-                     schema == "https")
+            downloader->Shutdown();
+        }
+
+        if(!run )
+        {// check http/https
+            std::unique_ptr<CHttpDownloader> downloader(new CHttpDownloader(lpInstancesManager, spAsynFrameThread));
+            const char *httpurl = downloader->Parse(argc, argv);
+            if( httpurl )
             {
-                std::unique_ptr<CHttpDownloader> downloader(new CHttpDownloader(lpInstancesManager, spAsynFrameThread));
-                const char *httpurl = downloader->Parse(argc, argv);
+                run = 1;
                 if( downloader->Start(httpurl))
                 {
                     while( WAIT_OBJECT_0 != ::WaitForSingleObject(downloader->m_hNotify, 0) &&
@@ -158,12 +151,13 @@ int main(int argc, const char *argv[])
                         Sleep(100); //0.1sec
                     }
                 }
-                downloader->Shutdown();
             }
-            else
-            {
-                ShowUsage(argv[0]);
-            }
+            downloader->Shutdown();
+        }
+
+        if(!run )
+        {
+            ShowUsage(argv[0]);
         }
     }while(0);
 
