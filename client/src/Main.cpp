@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ftpx_Downloader.h"
 #include "http_Downloader.h"
+#include "websocket_Downloader.h"
 
 #ifdef AAPIDLL_USING
 #include <frame/asm/ITypedef_i.c>
@@ -139,6 +140,25 @@ int main(int argc, const char *argv[])
         if(!run )
         {// check http/https
             std::unique_ptr<CHttpDownloader> downloader(new CHttpDownloader(lpInstancesManager, spAsynFrameThread));
+            const char *httpurl = downloader->Parse(argc, argv);
+            if( httpurl )
+            {
+                run = 1;
+                if( downloader->Start(httpurl))
+                {
+                    while( WAIT_OBJECT_0 != ::WaitForSingleObject(downloader->m_hNotify, 0) &&
+                          _kbhit() == 0 )
+                    {
+                        Sleep(100); //0.1sec
+                    }
+                }
+            }
+            downloader->Shutdown();
+        }
+
+        if(!run )
+        {// check ws/wss
+            std::unique_ptr<CWebsocketDownloader> downloader(new CWebsocketDownloader(lpInstancesManager, spAsynFrameThread));
             const char *httpurl = downloader->Parse(argc, argv);
             if( httpurl )
             {
