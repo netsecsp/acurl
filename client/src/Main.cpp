@@ -76,8 +76,8 @@ static void ShowUsage(std::string name)
     printf("      -referurl use refer url\n");
     printf("      -s use TLS or SSL\n");
     printf("      -check-certificate\n");
-    printf("      -u use proxy url, protocol://[user:password@]host[:port]/ver?params\n");
-    printf("      -c continue-at OFFSET  Resumed transfer OFFSET\n");
+    printf("      -u use proxy url, protocol://[user:password@]host[:port]/ver?method=v\n");
+    printf("      -c continue-at OFFSET Resumed transfer OFFSET\n");
     printf("      -o save FILE\n");
     printf("example: %s -4 \"http://localhost/test.exe\"\n", name.c_str());
 }
@@ -121,30 +121,11 @@ int main(int argc, const char *argv[])
  
         {// check ftp/ftps
             std::unique_ptr<CFtpxDownloader> downloader(new CFtpxDownloader(lpInstancesManager, spAsynFrameThread));
-            const char *ftpxurl = downloader->Parse(argc, argv);
-            if( ftpxurl )
+            const char *url = downloader->Parse(argc, argv);
+            if( url )
             {
                 run = 1;
-                if( downloader->Start(ftpxurl))
-                {
-                    while( WAIT_OBJECT_0 != ::WaitForSingleObject(downloader->m_hNotify, 0) &&
-                          _kbhit() == 0 )
-                    {
-                        Sleep(100); //0.1sec
-                    }
-                }
-            }
-            downloader->Shutdown();
-        }
-
-        if(!run )
-        {// check http/https
-            std::unique_ptr<CHttpDownloader> downloader(new CHttpDownloader(lpInstancesManager, spAsynFrameThread));
-            const char *httpurl = downloader->Parse(argc, argv);
-            if( httpurl )
-            {
-                run = 1;
-                if( downloader->Start(httpurl))
+                if( downloader->Start(url))
                 {
                     while( WAIT_OBJECT_0 != ::WaitForSingleObject(downloader->m_hNotify, 0) &&
                           _kbhit() == 0 )
@@ -159,11 +140,30 @@ int main(int argc, const char *argv[])
         if(!run )
         {// check ws/wss
             std::unique_ptr<CWebsocketDownloader> downloader(new CWebsocketDownloader(lpInstancesManager, spAsynFrameThread));
-            const char *httpurl = downloader->Parse(argc, argv);
-            if( httpurl )
+            const char *url = downloader->Parse(argc, argv);
+            if( url )
             {
                 run = 1;
-                if( downloader->Start(httpurl))
+                if( downloader->Start(url))
+                {
+                    while( WAIT_OBJECT_0 != ::WaitForSingleObject(downloader->m_hNotify, 0) &&
+                          _kbhit() == 0 )
+                    {
+                        Sleep(100); //0.1sec
+                    }
+                }
+            }
+            downloader->Shutdown();
+        }
+
+        if(!run )
+        {// check http/https
+            std::unique_ptr<CHttpDownloader> downloader(new CHttpDownloader(lpInstancesManager, spAsynFrameThread));
+            const char *url = downloader->Parse(argc, argv);
+            if( url )
+            {
+                run = 1;
+                if( downloader->Start(url))
                 {
                     while( WAIT_OBJECT_0 != ::WaitForSingleObject(downloader->m_hNotify, 0) &&
                           _kbhit() == 0 )
