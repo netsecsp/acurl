@@ -315,7 +315,7 @@ public:
         CComPtr<IAsynRawSocket> spAsynPtlSocket;
         if( proxyname == "none" )
         {// 没有配置代理的情况: none
-            m_spAsynNetwork->CreateAsynPtlSocket( STRING_from_string("websocket"), (IUnknown **)&spAsynInnSocket.p, STRING_from_string(schema == "ws"? "tcp" : m_setsfile.get_string("ssl", "algo", "tls/1.0")), &spAsynPtlSocket);
+            m_spAsynNetwork->CreateAsynPtlSocket( STRING_from_string("websocket"), spAsynInnSocket, 0, STRING_from_string(schema == "ws"? "tcp" : m_setsfile.get_string("ssl", "algo", "tls/1.0")), &spAsynPtlSocket);
             if( spAsynPtlSocket == NULL )
             {
                 printf("can't load plugin: websocket\n");
@@ -334,7 +334,7 @@ public:
                     ssl.insert(0, ":");
 
                 CComPtr<IAsynRawSocket> spAsynTmpSocket;
-                m_spAsynNetwork->CreateAsynPtlSocket( STRING_from_string("proxy"), (IUnknown **)&spAsynInnSocket.p, STRING_from_string(proxyname + ver + ssl), &spAsynTmpSocket );
+                m_spAsynNetwork->CreateAsynPtlSocket( STRING_from_string("proxy"), spAsynInnSocket, 0, STRING_from_string(proxyname + ver + ssl), &spAsynTmpSocket );
                 if( spAsynTmpSocket == NULL )
                 {
                     printf("can't load plugin: proxy.%s\n", proxyname.c_str());
@@ -362,7 +362,7 @@ public:
                 }
 
                 CComPtr<IAsynRawSocket> spAsynTmpSocket;
-                m_spAsynNetwork->CreateAsynPtlSocket( STRING_from_string("ssl"), (IUnknown **)&spAsynInnSocket.p, STRING_from_string(m_setsfile.get_string("ssl", "algo", "tls/1.0")), &spAsynTmpSocket );
+                m_spAsynNetwork->CreateAsynPtlSocket( STRING_from_string("ssl"), spAsynInnSocket, 0, STRING_from_string(m_setsfile.get_string("ssl", "algo", "tls/1.0")), &spAsynTmpSocket );
                 if( spAsynTmpSocket == NULL )
                 {
                     printf("can't load plugin: ssl\n");
@@ -374,7 +374,7 @@ public:
                 }
             }
 
-            m_spAsynNetwork->CreateAsynPtlSocket(STRING_from_string("websocket"), (IUnknown **)&spAsynInnSocket.p, STRING_from_string("tcp"), &spAsynPtlSocket );
+            m_spAsynNetwork->CreateAsynPtlSocket(STRING_from_string("websocket"), spAsynInnSocket, 0, STRING_from_string("tcp"), &spAsynPtlSocket );
             if( spAsynPtlSocket == NULL )
             {
                 printf("can't load plugin: websocket\n");
