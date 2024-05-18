@@ -1,7 +1,7 @@
 /*****************************************************************************
 Copyright (c) netsecsp 2012-2032, All rights reserved.
 
-Developer: Shengqian Yang, from China, E-mail: netsecsp@hotmail.com, last updated 05/01/2022
+Developer: Shengqian Yang, from China, E-mail: netsecsp@hotmail.com, last updated 01/15/2024
 http://asynframe.sf.net
 
 Redistribution and use in source and binary forms, with or without
@@ -141,7 +141,7 @@ HRESULT CWebsocketDownloader::OnIomsgNotify( uint64_t lParam1, uint64_t lAction,
         }
 
         CComPtr<INetmsg> spHttpmsg;
-        lpAsynIoOperation->GetCompletedObject(1, IID_INetmsg, (void **)&spHttpmsg);
+        lpAsynIoOperation->GetCompletedObject(1, IID_INetmsg, (IUnknown **)&spHttpmsg);
 
         STRING Method;
         STRING Params;
