@@ -170,12 +170,10 @@
     <ClCompile Include="..\..\src\ftpx_Downloader.cpp" />
     <ClCompile Include="..\..\src\http_Downloader.cpp" />
     <ClCompile Include="..\..\src\websocket_Downloader.cpp" />
-    <ClCompile Include="..\..\src\setting.cpp" />
     <ClCompile Include="..\..\src\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\stdafx.h" />
-    <ClInclude Include="..\..\src\setting.h" />
     <ClInclude Include="..\..\src\ftpx_Downloader.h" />
     <ClInclude Include="..\..\src\http_Downloader.h" />
     <ClInclude Include="..\..\src\websocket_Downloader.h" />

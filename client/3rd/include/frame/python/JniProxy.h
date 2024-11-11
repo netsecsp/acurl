@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////////////////////
-#if !defined(AFX_SETTING_H__C98615AD_6DF5_4F69_92AE_BE46B4D3DDFF__INCLUDED_)
-#define AFX_SETTING_H__C98615AD_6DF5_4F69_92AE_BE46B4D3DDFF__INCLUDED_
+///////////////////////////////////////////////////////////////////////////////
+#if !defined(AFX_PROXY_PYTHON_H__8A503072_4124_4233_9BEF_3671D8669695__INCLUDED_)
+#define AFX_PROXY_PYTHON_H__8A503072_4124_4233_9BEF_3671D8669695__INCLUDED_
 /*****************************************************************************
 Copyright (c) netsecsp 2012-2032, All rights reserved.
 
-Author: Shengqian Yang, netsecsp@hotmail.com, China, last updated 01/15/2024
-http://acurl.sf.net
+Developer: Shengqian Yang, from China, E-mail: netsecsp@hotmail.com, last updated 01/15/2024
+http://asynframe.sf.net
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -36,32 +36,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #endif // _MSC_VER > 1000
 
-#pragma warning(disable:4786)
-#include <string>
-#include <set>
-#include <map>
+#ifdef __cplusplus
+extern "C" {
+#endif
+#define PY_SSIZE_T_CLEAN  /* Make "s#" use Py_ssize_t rather than int. */
+#include "python.h"
+#ifdef __cplusplus
+}
+#endif
+#include "PyPtr.h"
+#include "../AsynCore.h"
+#include "../asm/IScriptHost.h"
+NAMESPACE_BEGIN(python)
 
-class setting
-{
-public:
-    setting(const std::string &filename);
+/////////////////////////////////////////////////////////////////////
+IScriptHost *GetScriptHost( void ); //get from sys.xvmhost
 
-    std::string get_string(const std::string &section, const std::string &entry, const std::string &default_str = "" );
-    void set_string(const std::string &section, const std::string &entry, const std::string &value);
+//生成object对应的python对象
+//1.addref_for_python=true表示在python端持有c对象的引用计数器
+//2.auto_bindc_python=true表示调用SObject.Set绑定python对象
+PyObject    *Create( /*[in ]*/IUnknown *object, /*[in ]*/const char *name, /*[in ]*/PyObject *module, /*[in ]*/bool addref_for_python = false, /*[in ]*/bool auto_bindc_python = false );
+/////////////////////////////////////////////////////////////////////
 
-    long get_long(const std::string &section, const std::string &entry, long default_long = 0);
-    void set_long(const std::string &section, const std::string &entry, long value );
+NAMESPACE_END(python)
 
-    bool get_bool(const std::string &section, const std::string &entry, bool default_bool = 0);
-    void set_bool(const std::string &section, const std::string &entry, bool value );
-
-    bool is_exist(const std::string &section, const std::string &entry);
-
-public:
-    std::set<std::string>              m_sections;
-
-private:
-    std::map<std::string, std::string> m_key2vals;
-};
-
-#endif // !defined(AFX_SETTING_H__C98615AD_6DF5_4F69_92AE_BE46B4D3DDFF__INCLUDED_)
+#endif // !defined(AFX_PROXY_PYTHON_H__8A503072_4124_4233_9BEF_3671D8669695__INCLUDED_)

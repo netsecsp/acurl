@@ -98,7 +98,8 @@ int main(int argc, const char *argv[])
         }
     }
 
-    if( Initialize(NULL, NULL) != NO_ERROR )
+    asynsdk::CStringSetter fileconf(1, "proxy.txt");
+    if( Initialize(NULL,&fileconf) != NO_ERROR )
     {
         printf("fail to Initialize asynframe\n");
         return 0;
